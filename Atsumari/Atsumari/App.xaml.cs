@@ -2,7 +2,7 @@
 using System.Data;
 using System.Windows;
 
-namespace MediaBrowser
+namespace Atsumari
 {
     /// <summary>
     /// Interaction logic for App.xaml

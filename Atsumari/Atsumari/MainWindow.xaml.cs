@@ -5,7 +5,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Shapes;
 
-namespace MediaBrowser
+namespace Atsumari
 {
     public partial class MainWindow : Window
     {
@@ -83,7 +83,7 @@ namespace MediaBrowser
             List<Item> newItems = new();
 
             string? best = Directory.GetFiles(folder, "*.exe")
-                .Where(f => !skip.Any(w => f.Contains(w,StringComparison.OrdinalIgnoreCase)))
+                .Where(f => !skip.Any(w => f.Contains(w, StringComparison.OrdinalIgnoreCase)))
                 .FirstOrDefault();
 
             if (best != null)
@@ -101,7 +101,7 @@ namespace MediaBrowser
             if (subs.Length == 0) return new();
 
             //search in them
-            foreach(string sub in subs)
+            foreach (string sub in subs)
             {
                 newItems.AddRange(SearchFolderForExes(sub));
             }

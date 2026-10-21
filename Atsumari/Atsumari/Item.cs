@@ -6,7 +6,7 @@ using System.Linq;
 using System.Windows.Media;
 using System.Text.Json.Serialization;
 
-namespace MediaBrowser
+namespace Atsumari
 {
     public class Item(string exePath)
     {

@@ -4,11 +4,10 @@ using System.IO;
 using System.Text;
 using System.Text.Json;
 
-namespace MediaBrowser
+namespace Atsumari
 {
     public static class SaveManager
     {
-
         public static List<Item> LoadJson()
         {
             string json = GetFile();
@@ -36,7 +35,7 @@ namespace MediaBrowser
 
         public static string GetFile()
         {
-            string folder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "MediaBrowser");
+            string folder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Atsumari");
             Directory.CreateDirectory(folder);
 
             return Path.Combine(folder, "Items.json");
