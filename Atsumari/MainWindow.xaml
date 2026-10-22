@@ -27,9 +27,14 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="150"/>
             </Grid.ColumnDefinitions>
-            <StackPanel Orientation="Vertical"  Grid.Column="1">
-                <TextBox x:Name="FilterBox" TextChanged="FilterBox_TextChanged" Width="Auto" Height="25" />
-                <ListBox x:Name="ItemsListBox" SelectionChanged="ItemList_SelectionChanged"  MouseDoubleClick="ItemList_MouseDoubleClick" SelectionMode="Extended">
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBox Grid.Row="0" x:Name="FilterBox" TextChanged="FilterBox_TextChanged" Width="Auto" Height="25" />
+                <ListBox Grid.Row="1" x:Name="ItemsListBox" SelectionChanged="ItemList_SelectionChanged"  MouseDoubleClick="ItemList_MouseDoubleClick" SelectionMode="Extended">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
@@ -39,7 +44,7 @@
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
-            </StackPanel>
+            </Grid>
             <StackPanel Orientation="Vertical" Grid.Column="2">
                 <Image x:Name="selectedItemIcon" Width="80" Height="80" Margin="0,0,8,0"/>
                 <TextBox TextChanged="selectedItemInput_TextChanged" x:Name="selectedItemInput" Text="Hello" HorizontalAlignment="Center" />
