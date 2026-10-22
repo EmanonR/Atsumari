@@ -1,8 +1,10 @@
 ﻿using Microsoft.Win32;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows;
+using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
 namespace Atsumari
@@ -12,6 +14,8 @@ namespace Atsumari
 
         private List<Item> items = new();
         string[] skip = { "unins", "crash" };
+
+        Item selectedItem;
 
         public MainWindow()
         {
@@ -27,7 +31,7 @@ namespace Atsumari
 
             if (dialog.ShowDialog() == true)
             {
-                bool exists = items.Any(i => i.Name == System.IO.Path.GetFileNameWithoutExtension(dialog.FileName));
+                bool exists = items.Any(i => i.originalName == System.IO.Path.GetFileNameWithoutExtension(dialog.FileName));
 
                 if (exists)
                 {
@@ -149,7 +153,8 @@ namespace Atsumari
         }
 
         private void Launch_Click(object sender, RoutedEventArgs e) => LaunchExe();
-        private void ItemList_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e) => LaunchExe();
+
+        private void ItemList_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e) => LaunchExe(); 
 
         void LaunchExe()
         {
@@ -165,7 +170,7 @@ namespace Atsumari
                 return;
             }
 
-            if (string.IsNullOrEmpty(item.ExePath))
+            if (string.IsNullOrEmpty(item.filePath))
             {
                 MessageBox.Show("This item has no exe.");
                 return;
@@ -175,7 +180,7 @@ namespace Atsumari
             {
                 Process.Start(new ProcessStartInfo
                 {
-                    FileName = item.ExePath,
+                    FileName = item.filePath,
                     UseShellExecute = true,
                 });
             }
@@ -185,11 +190,30 @@ namespace Atsumari
             }
         }
 
-
         private void RefreshList()
         {
             ItemList.ItemsSource = null;
             ItemList.ItemsSource = items;
+        }
+
+        private void ItemList_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            if (ItemList.SelectedItem is Item item)
+            {
+                selectedItem = item;
+
+                selectedItemInput.Text = selectedItem.displayName;
+                selectedItemIcon.Source = selectedItem.Icon;
+            }
+        }
+
+        private void selectedItemInput_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            if (selectedItem == null) return;
+
+            selectedItem.displayName = selectedItemInput.Text;
+            SaveManager.SaveJson(items);
+            RefreshList();
         }
     }
 }

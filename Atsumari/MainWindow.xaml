@@ -7,25 +7,43 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
+        <!-- Vertical Split, Topbar, Tabs -->
         <Grid.RowDefinitions>
+            <RowDefinition Height="25"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <StackPanel Grid.Row="0" Orientation="Horizontal">
+        <StackPanel Grid.Row="1" Orientation="Horizontal">
             <Button Content="Remove Exe" Click="Remove_Click" Margin="5, 10" Padding="10,5" />
             <Button Content="Add Exe" Click="Add_Click" Margin="5, 10" Padding="10,5" />
             <Button Content="Add Folder" Click="Add_Folder" Margin="5,10" Padding="10,5" />
             <Button Content="Launch Exe" Click="Launch_Click" Margin="5,10" Padding="10,5" />
         </StackPanel>
-        <ListBox x:Name="ItemList" Grid.Row="1"  MouseDoubleClick="ItemList_MouseDoubleClick" SelectionMode="Extended">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel Orientation="Horizontal">
-                        <Image Source="{Binding Icon}" Width="20" Height="20" Margin="0,0,8,0"/>
-                        <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
-                    </StackPanel>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+
+
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="150"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="150"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Orientation="Vertical"  Grid.Column="1">
+                <TextBox x:Name="SearchInput" Width="Auto" Height="25" MaxLength="100" />
+                <ListBox x:Name="ItemList" SelectionChanged="ItemList_SelectionChanged"  MouseDoubleClick="ItemList_MouseDoubleClick" SelectionMode="Extended">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="{Binding Icon}" Width="20" Height="20" Margin="0,0,8,0"/>
+                                <TextBlock Text="{Binding displayName}" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </StackPanel>
+            <StackPanel Orientation="Vertical" Grid.Column="2">
+                <Image x:Name="selectedItemIcon" Width="80" Height="80" Margin="0,0,8,0"/>
+                <TextBox TextChanged="selectedItemInput_TextChanged" x:Name="selectedItemInput" Text="Hello" HorizontalAlignment="Center" />
+            </StackPanel>
+        </Grid>
     </Grid>
 </Window>

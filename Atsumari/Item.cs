@@ -8,10 +8,13 @@ using System.Text.Json.Serialization;
 
 namespace Atsumari
 {
-    public class Item(string exePath)
+    public class Item(string filePath)
     {
-        public string Name { get; set; } = Path.GetFileNameWithoutExtension(exePath);
-        public string ExePath { get; set; } = exePath;
+        public string originalName { get; set; } = Path.GetFileNameWithoutExtension(filePath);
+        public string displayName { get; set; } = Path.GetFileNameWithoutExtension(filePath);
+        public string filePath { get; set; } = filePath;
+        public List<string> tags { get; set; } = new();
+        public List<string> collections { get; set; } = new();
 
         private ImageSource? icon;
 
@@ -20,7 +23,7 @@ namespace Atsumari
         {
             get
             {
-                if (icon == null) icon = PictureHelper.GetPicture(exePath);
+                if (icon == null) icon = PictureHelper.GetPicture(filePath);
                 return icon;
             }
         }
