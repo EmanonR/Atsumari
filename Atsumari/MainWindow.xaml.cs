@@ -17,6 +17,8 @@ namespace Atsumari
         private List<Item> items = new();
         private Item selectedItem;
 
+        private bool isBusy;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -37,7 +39,7 @@ namespace Atsumari
 
             if (dialog.ShowDialog() == true)
             {
-                bool exists = items.Any(i => i.originalName == System.IO.Path.GetFileNameWithoutExtension(dialog.FileName));
+                bool exists = items.Any(i => i.originalName == Path.GetFileNameWithoutExtension(dialog.FileName));
 
                 if (exists)
                 {
@@ -49,52 +51,102 @@ namespace Atsumari
             }
         }
 
-        private void Add_Folder(object sender, RoutedEventArgs e)
+        private async void Add_Folder(object sender, RoutedEventArgs e)
         {
+            if (isBusy) return;
+
+            ScanInfoBox.Text = $"Scannin...";
+
             var dialog = new OpenFolderDialog { Title = "Pick a folder" };
 
             if (dialog.ShowDialog() == true)
             {
-                AddItemsToList(SearchFolderForExes(dialog.FolderName));
+                isBusy = true;
+                string path = dialog.FolderName;
+
+                try
+                {
+                    List<Item> newItems = await Task.Run(() => SearchPathForExes(path));
+
+                    AddItemsToList(newItems);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Scan failed:\n" + ex.Message);
+                }
+                finally
+                {
+                    isBusy = false;
+                }
             }
+
+            ScanInfoBox.Text = $"Scan complete!";
         }
 
-        void Window_Drop(object sender, DragEventArgs e)
+        async void Window_Drop(object sender, DragEventArgs e)
         {
+            if (isBusy) return;
+
+            ScanInfoBox.Text = $"Scannin...";
+
             if (e.Data.GetData(DataFormats.FileDrop) is string[] paths)
             {
-                List<Item> newItems = new();
+                isBusy = true;
 
-                foreach (string path in paths)
+                try
                 {
-                    if (Directory.Exists(path))
-                    {
-                        // folder
-                        newItems.AddRange(SearchFolderForExes(path));
-                    }
-                    else if (File.Exists(path))
-                    {
-                        // File
+                    List<Item> newItems = await Task.Run(() => SearchPathsForExes(paths.ToList()));
 
-                        //Check if exe
-                        MessageBox.Show(System.IO.Path.GetExtension(path));
-
-                        newItems.Add(new Item(path));
-                    }
+                    AddItemsToList(newItems);
                 }
-
-                AddItemsToList(newItems);
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Scan failed:\n" + ex.Message);
+                }
+                finally
+                {
+                    isBusy = false; 
+                }
             }
+
+            ScanInfoBox.Text = $"Scan complete!";
         }
 
-        List<Item> SearchFolderForExes(string folder)
+        List<Item> SearchPathsForExes(List<string> paths)
+        {
+            List<Item> newItems = new();
+
+            foreach (string path in paths)
+            {
+                if (Directory.Exists(path))
+                {
+                    // folder
+                    newItems.AddRange(SearchPathForExes(path));
+                }
+                else if (File.Exists(path))
+                {
+                    // File
+
+                    //Check if exe
+                    if (!string.Equals(Path.GetExtension(path), ".exe", StringComparison.OrdinalIgnoreCase)) continue;
+
+                    newItems.Add(new Item(path));
+                }
+            }
+
+            return newItems;
+        }
+
+        List<Item> SearchPathForExes(string path)
         {
             //Look for game exe
             List<Item> newItems = new();
 
-            string? best = Directory.GetFiles(folder, "*.exe")
-                .Where(f => !skip.Any(w => f.Contains(w, StringComparison.OrdinalIgnoreCase)))
+            string? best = Directory.GetFiles(path, "*.exe")
+                .Where(f => !skip.Any(w => Path.GetFileName(f).Contains(w, StringComparison.OrdinalIgnoreCase)))
                 .FirstOrDefault();
+
+            string[] subs = Directory.GetDirectories(path);
 
             if (best != null)
             {
@@ -105,7 +157,7 @@ namespace Atsumari
             }
 
             //Gather subfolders
-            string[] subs = Directory.GetDirectories(folder);
+            
 
             //Return if no subs
             if (subs.Length == 0) return new();
@@ -113,7 +165,7 @@ namespace Atsumari
             //search in them
             foreach (string sub in subs)
             {
-                newItems.AddRange(SearchFolderForExes(sub));
+                newItems.AddRange(SearchPathForExes(sub));
             }
 
             //Finish
@@ -148,6 +200,14 @@ namespace Atsumari
             var answer = MessageBox.Show($"Remove {chosen.Count} items?", "Title", MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (answer != MessageBoxResult.Yes) return;
 
+            if (chosen.Count == 1)
+            {
+                ScanInfoBox.Text = $"Removed {chosen[0].displayName}.";
+            }
+            else
+            {
+                ScanInfoBox.Text = $"Removed {chosen.Count} items.";
+            }
 
             foreach (var item in chosen)
             {
@@ -156,6 +216,20 @@ namespace Atsumari
 
             SaveManager.SaveJson(items);
             RefreshList();
+        }
+
+        private void Remove_All(object sender, RoutedEventArgs e)
+        {
+            var answer = MessageBox.Show($"Remove all items?", "Title", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (answer != MessageBoxResult.Yes) return;
+
+            int removeCount = items.Count;
+
+            items.Clear();
+            SaveManager.SaveJson(items);
+            RefreshList();
+
+            ScanInfoBox.Text = $"Removed {removeCount} items.";
         }
 
         private void Launch_Click(object sender, RoutedEventArgs e) => LaunchExe();
