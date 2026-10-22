@@ -28,8 +28,8 @@
                 <ColumnDefinition Width="150"/>
             </Grid.ColumnDefinitions>
             <StackPanel Orientation="Vertical"  Grid.Column="1">
-                <TextBox x:Name="SearchInput" Width="Auto" Height="25" MaxLength="100" />
-                <ListBox x:Name="ItemList" SelectionChanged="ItemList_SelectionChanged"  MouseDoubleClick="ItemList_MouseDoubleClick" SelectionMode="Extended">
+                <TextBox x:Name="FilterBox" TextChanged="FilterBox_TextChanged" Width="Auto" Height="25" />
+                <ListBox x:Name="ItemsListBox" SelectionChanged="ItemList_SelectionChanged"  MouseDoubleClick="ItemList_MouseDoubleClick" SelectionMode="Extended">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">

@@ -1,27 +1,33 @@
 ﻿using Microsoft.Win32;
+using System.ComponentModel;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Windows;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+using System.Windows.Controls;
+using System.Windows.Data;
 
 namespace Atsumari
 {
     public partial class MainWindow : Window
     {
 
-        private List<Item> items = new();
         string[] skip = { "unins", "crash" };
 
-        Item selectedItem;
+        private readonly ICollectionView _itemsView;
+        private List<Item> items = new();
+        private Item selectedItem;
 
         public MainWindow()
         {
             InitializeComponent();
 
             items = SaveManager.LoadJson();
+
+            ItemsListBox.ItemsSource = items;
+
+            _itemsView = CollectionViewSource.GetDefaultView(items);
+            _itemsView.Filter = item => string.IsNullOrWhiteSpace(FilterBox.Text) || ((Item)item).displayName.Contains(FilterBox.Text, StringComparison.OrdinalIgnoreCase);
+
             RefreshList();
         }
 
@@ -131,7 +137,7 @@ namespace Atsumari
 
         private void Remove_Click(object sender, RoutedEventArgs e)
         {
-            var chosen = ItemList.SelectedItems.Cast<Item>().ToList();
+            var chosen = ItemsListBox.SelectedItems.Cast<Item>().ToList();
 
             if (chosen.Count < 1)
             {
@@ -158,13 +164,13 @@ namespace Atsumari
 
         void LaunchExe()
         {
-            if (ItemList.SelectedItems.Count > 1)
+            if (ItemsListBox.SelectedItems.Count > 1)
             {
                 MessageBox.Show("Select only one item to launch");
                 return;
             }
 
-            if (ItemList.SelectedItem is not Item item)
+            if (ItemsListBox.SelectedItem is not Item item)
             {
                 MessageBox.Show("Select one first.");
                 return;
@@ -192,13 +198,12 @@ namespace Atsumari
 
         private void RefreshList()
         {
-            ItemList.ItemsSource = null;
-            ItemList.ItemsSource = items;
+            _itemsView.Refresh();
         }
 
         private void ItemList_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            if (ItemList.SelectedItem is Item item)
+            if (ItemsListBox.SelectedItem is Item item)
             {
                 selectedItem = item;
 
@@ -214,6 +219,11 @@ namespace Atsumari
             selectedItem.displayName = selectedItemInput.Text;
             SaveManager.SaveJson(items);
             RefreshList();
+        }
+
+        private void FilterBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            _itemsView.Refresh();
         }
     }
 }
