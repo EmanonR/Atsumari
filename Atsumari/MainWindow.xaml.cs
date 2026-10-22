@@ -1,23 +1,33 @@
 ﻿using Microsoft.Win32;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Windows;
-using System.Windows.Shapes;
+using System.Windows.Controls;
+using System.Windows.Data;
 
 namespace Atsumari
 {
     public partial class MainWindow : Window
     {
 
-        private List<Item> items = new();
         string[] skip = { "unins", "crash" };
+
+        private readonly ICollectionView _itemsView;
+        private List<Item> items = new();
+        private Item selectedItem;
 
         public MainWindow()
         {
             InitializeComponent();
 
             items = SaveManager.LoadJson();
+
+            ItemsListBox.ItemsSource = items;
+
+            _itemsView = CollectionViewSource.GetDefaultView(items);
+            _itemsView.Filter = item => string.IsNullOrWhiteSpace(FilterBox.Text) || ((Item)item).displayName.Contains(FilterBox.Text, StringComparison.OrdinalIgnoreCase);
+
             RefreshList();
         }
 
@@ -27,7 +37,7 @@ namespace Atsumari
 
             if (dialog.ShowDialog() == true)
             {
-                bool exists = items.Any(i => i.Name == System.IO.Path.GetFileNameWithoutExtension(dialog.FileName));
+                bool exists = items.Any(i => i.originalName == System.IO.Path.GetFileNameWithoutExtension(dialog.FileName));
 
                 if (exists)
                 {
@@ -127,7 +137,7 @@ namespace Atsumari
 
         private void Remove_Click(object sender, RoutedEventArgs e)
         {
-            var chosen = ItemList.SelectedItems.Cast<Item>().ToList();
+            var chosen = ItemsListBox.SelectedItems.Cast<Item>().ToList();
 
             if (chosen.Count < 1)
             {
@@ -149,23 +159,24 @@ namespace Atsumari
         }
 
         private void Launch_Click(object sender, RoutedEventArgs e) => LaunchExe();
-        private void ItemList_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e) => LaunchExe();
+
+        private void ItemList_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e) => LaunchExe(); 
 
         void LaunchExe()
         {
-            if (ItemList.SelectedItems.Count > 1)
+            if (ItemsListBox.SelectedItems.Count > 1)
             {
                 MessageBox.Show("Select only one item to launch");
                 return;
             }
 
-            if (ItemList.SelectedItem is not Item item)
+            if (ItemsListBox.SelectedItem is not Item item)
             {
                 MessageBox.Show("Select one first.");
                 return;
             }
 
-            if (string.IsNullOrEmpty(item.ExePath))
+            if (string.IsNullOrEmpty(item.filePath))
             {
                 MessageBox.Show("This item has no exe.");
                 return;
@@ -175,7 +186,7 @@ namespace Atsumari
             {
                 Process.Start(new ProcessStartInfo
                 {
-                    FileName = item.ExePath,
+                    FileName = item.filePath,
                     UseShellExecute = true,
                 });
             }
@@ -185,11 +196,34 @@ namespace Atsumari
             }
         }
 
-
         private void RefreshList()
         {
-            ItemList.ItemsSource = null;
-            ItemList.ItemsSource = items;
+            _itemsView.Refresh();
+        }
+
+        private void ItemList_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            if (ItemsListBox.SelectedItem is Item item)
+            {
+                selectedItem = item;
+
+                selectedItemInput.Text = selectedItem.displayName;
+                selectedItemIcon.Source = selectedItem.Icon;
+            }
+        }
+
+        private void selectedItemInput_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            if (selectedItem == null) return;
+
+            selectedItem.displayName = selectedItemInput.Text;
+            SaveManager.SaveJson(items);
+            RefreshList();
+        }
+
+        private void FilterBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            _itemsView.Refresh();
         }
     }
 }
