@@ -13,26 +13,44 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <StackPanel Grid.Row="1" Orientation="Horizontal">
-            <Button Content="Remove Exe" Click="Remove_Click" Margin="5, 10" Padding="10,5" />
-            <Button Content="Remove All" Click="Remove_All" Margin="5, 10" Padding="10,5" />
-            <Button Content="Add Exe" Click="Add_Click" Margin="5, 10" Padding="10,5" />
-            <Button Content="Add Folder" Click="Add_Folder" Margin="5,10" Padding="10,5" />
-            <Button Content="Launch Exe" Click="Launch_Click" Margin="5,10" Padding="10,5" />
-        </StackPanel>
+        <Border Grid.Row="0" BorderBrush="Gray" BorderThickness="1"/>
+        <Border Grid.Row="1" BorderBrush="Gray" BorderThickness="1">
+            <StackPanel Orientation="Horizontal">
+                <Button Content="Remove Exe" Click="Remove_Click" Margin="5, 10" Padding="10,5" />
+                <Button Content="Remove All" Click="Remove_All" Margin="5, 10" Padding="10,5" />
+                <Button Content="Add Exe" Click="Add_Click" Margin="5, 10" Padding="10,5" />
+                <Button Content="Add Folder" Click="Add_Folder" Margin="5,10" Padding="10,5" />
+                <Button Content="Launch Exe" Click="Launch_Click" Margin="5,10" Padding="10,5" />
+            </StackPanel>
+        </Border>
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="150"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="150"/>
             </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" BorderBrush="Gray" BorderThickness="1">
+            </Border>
             <Grid Grid.Column="1">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-                <TextBox Grid.Row="0" x:Name="FilterBox" TextChanged="FilterBox_TextChanged" Height="25" />
+                <TextBox Padding="6,4" VerticalContentAlignment="Center" x:Name="FilterBox" TextChanged="FilterBox_TextChanged" />
+                <TextBlock Padding="6,4" VerticalAlignment="Center" Foreground="Gray" IsHitTestVisible="False" Text="Search...">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Text, ElementName=FilterBox}" Value="">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
                 <ListBox Grid.Row="1" x:Name="ItemsListBox" SelectionChanged="ItemList_SelectionChanged"  MouseDoubleClick="ItemList_MouseDoubleClick" SelectionMode="Extended">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
@@ -43,12 +61,16 @@
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
-                <TextBlock Grid.Row="2" x:Name="ScanInfoBox" Height="25"/>
+                <Border Grid.Row="2" BorderBrush="Gray" BorderThickness="1">
+                    <TextBlock x:Name="ScanInfoBox" Height="25"/>
+                </Border>
             </Grid>
-            <StackPanel Orientation="Vertical" Grid.Column="2">
-                <Image x:Name="selectedItemIcon" Width="80" Height="80" Margin="0,0,8,0"/>
-                <TextBox TextChanged="selectedItemInput_TextChanged" x:Name="selectedItemInput" Text="Hello" HorizontalAlignment="Center" />
-            </StackPanel>
+            <Border Grid.Column="2" BorderBrush="Gray" BorderThickness="1">
+                <StackPanel Orientation="Vertical">
+                    <Image x:Name="selectedItemIcon" Width="80" Height="80" Margin="0,0,8,0"/>
+                    <TextBox TextChanged="selectedItemInput_TextChanged" x:Name="selectedItemInput" Text="Hello" HorizontalAlignment="Center" />
+                </StackPanel>
+            </Border>
         </Grid>
     </Grid>
 </Window>
