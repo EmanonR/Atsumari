@@ -66,7 +66,7 @@
                         </TextBlock.Style>
                     </TextBlock>
                 </Grid>
-                <ListBox Grid.Row="2" x:Name="ItemsListBox" SelectionChanged="ItemList_SelectionChanged"  MouseDoubleClick="ItemList_MouseDoubleClick" SelectionMode="Extended">
+                <ListBox Grid.Row="2" x:Name="ItemsListBox" MouseDoubleClick="ItemList_MouseDoubleClick" SelectionMode="Extended">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
@@ -84,7 +84,7 @@
                 <StackPanel Orientation="Vertical">
                     <Image Source="{Binding SelectedItem.Icon, ElementName=ItemsListBox}" Width="80" Height="80" Margin="0,8,0,8"/>
                     <TextBlock Text="Item name:" Width="Auto" Margin="10,0"/>
-                    <TextBox TextChanged="selectedItemInput_TextChanged" x:Name="selectedItemInput" Width="Auto" Margin="10,0"/>
+                    <TextBox LostFocus="TextBox_LostFocus" Text="{Binding SelectedItem.displayName, ElementName=ItemsListBox, UpdateSourceTrigger=PropertyChanged}" Width="Auto" Margin="10,0"/>
                     <Button Content="Launch Exe" Click="Launch_Click" Margin="10,10,10,5" />
                     <Button Content="Open Directory" Click="OpenDirectory_Click" Margin="10,5,10,10"/>
                 </StackPanel>

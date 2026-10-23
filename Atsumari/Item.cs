@@ -12,7 +12,7 @@ namespace Atsumari
     public class Item(string filePath) : INotifyPropertyChanged
 {
         public string originalName { get; set; } = Path.GetFileNameWithoutExtension(filePath);
-        public string displayName { get; set; } = Path.GetFileNameWithoutExtension(filePath);
+        private string _displayName = Path.GetFileNameWithoutExtension(filePath);
         public string filePath { get; set; } = filePath;
         public List<string> tags { get; set; } = new();
         public List<string> collections { get; set; } = new();
@@ -25,6 +25,18 @@ namespace Atsumari
         private void OnPropertyChanged(string name)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        }
+
+        public string displayName
+        {
+            get { return _displayName; }
+            set
+            {
+                if (_displayName == value) return;
+
+                _displayName = value;
+                OnPropertyChanged(nameof(displayName));
+            }
         }
 
         [JsonIgnore]

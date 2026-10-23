@@ -15,7 +15,6 @@ namespace Atsumari
 
         private readonly ICollectionView _itemsView;
         private List<Item> items = new();
-        private Item selectedItem;
 
         private bool isBusy;
 
@@ -286,28 +285,14 @@ namespace Atsumari
             _itemsView.Refresh();
         }
 
-        private void ItemList_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
-        {
-            if (ItemsListBox.SelectedItem is Item item)
-            {
-                selectedItem = item;
-
-                selectedItemInput.Text = selectedItem.displayName;
-            }
-        }
-
-        private void selectedItemInput_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
-        {
-            if (selectedItem == null) return;
-
-            selectedItem.displayName = selectedItemInput.Text;
-            SaveManager.SaveJson(items);
-            RefreshList();
-        }
-
         private void FilterBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             _itemsView.Refresh();
+        }
+
+        private void TextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            SaveManager.SaveJson(items);
         }
     }
 }
