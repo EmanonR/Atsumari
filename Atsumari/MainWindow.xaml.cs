@@ -38,7 +38,7 @@ namespace Atsumari
 
             if (dialog.ShowDialog() == true)
             {
-                bool exists = items.Any(i => i.originalName == Path.GetFileNameWithoutExtension(dialog.FileName));
+                bool exists = items.Any(i => String.Equals(i.filePath, dialog.FileName, StringComparison.OrdinalIgnoreCase));
 
                 if (exists)
                 {
