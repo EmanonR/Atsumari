@@ -55,7 +55,7 @@ namespace Atsumari
         {
             if (isBusy) return;
 
-            ScanInfoBox.Text = $"Scannin...";
+            ScanInfoBox.Text = $"Scaning...";
 
             var dialog = new OpenFolderDialog { Title = "Pick a folder" };
 
@@ -69,6 +69,7 @@ namespace Atsumari
                     List<Item> newItems = await Task.Run(() => SearchPathForExes(path));
 
                     AddItemsToList(newItems);
+                    ScanInfoBox.Text = $"Scan complete!";
                 }
                 catch (Exception ex)
                 {
@@ -80,7 +81,7 @@ namespace Atsumari
                 }
             }
 
-            ScanInfoBox.Text = $"Scan complete!";
+
         }
 
         async void Window_Drop(object sender, DragEventArgs e)
@@ -234,6 +235,15 @@ namespace Atsumari
 
         private void Launch_Click(object sender, RoutedEventArgs e) => LaunchExe();
 
+        private void OpenDirectory_Click(object sender, RoutedEventArgs e)
+        {
+            if (ItemsListBox.SelectedItem == null) return;
+
+            Item item = ItemsListBox.SelectedItem as Item;
+
+            Process.Start("explorer.exe", $"/select,\"{item.filePath}\"");
+        }
+
         private void ItemList_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e) => LaunchExe(); 
 
         void LaunchExe()
@@ -282,7 +292,6 @@ namespace Atsumari
                 selectedItem = item;
 
                 selectedItemInput.Text = selectedItem.displayName;
-                selectedItemIcon.Source = selectedItem.Icon;
             }
         }
 

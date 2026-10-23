@@ -5,11 +5,12 @@ using System.Diagnostics;
 using System.Linq;
 using System.Windows.Media;
 using System.Text.Json.Serialization;
+using System.ComponentModel;
 
 namespace Atsumari
 {
-    public class Item(string filePath)
-    {
+    public class Item(string filePath) : INotifyPropertyChanged
+{
         public string originalName { get; set; } = Path.GetFileNameWithoutExtension(filePath);
         public string displayName { get; set; } = Path.GetFileNameWithoutExtension(filePath);
         public string filePath { get; set; } = filePath;
@@ -17,15 +18,37 @@ namespace Atsumari
         public List<string> collections { get; set; } = new();
 
         private ImageSource? icon;
+        private bool iconRequested;
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        private void OnPropertyChanged(string name)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        }
 
         [JsonIgnore]
         public ImageSource? Icon
         {
             get
             {
-                if (icon == null) icon = PictureHelper.GetPicture(filePath);
+                if (!iconRequested)
+                {
+                    iconRequested = true;
+                    LoadIcon();
+                }
+
                 return icon;
             }
+        }
+
+        private async void LoadIcon()
+        {
+            string path = filePath;
+            ImageSource? loaded = await Task.Run(() => PictureHelper.GetPicture(path));
+
+            icon = loaded;
+            OnPropertyChanged(nameof(Icon));
         }
     }
 }

@@ -7,7 +7,6 @@ namespace Atsumari
 {
     public static class PictureHelper
     {
-
         public static ImageSource? GetPicture(string path)
         {
             try
