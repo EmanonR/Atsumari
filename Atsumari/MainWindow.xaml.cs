@@ -55,13 +55,14 @@ namespace Atsumari
         {
             if (isBusy) return;
 
-            ScanInfoBox.Text = $"Scaning...";
 
             var dialog = new OpenFolderDialog { Title = "Pick a folder" };
 
             if (dialog.ShowDialog() == true)
             {
                 isBusy = true;
+                ScanInfoBox.Text = $"Scanning...";
+
                 string path = dialog.FolderName;
 
                 try
@@ -74,6 +75,7 @@ namespace Atsumari
                 catch (Exception ex)
                 {
                     MessageBox.Show("Scan failed:\n" + ex.Message);
+                    ScanInfoBox.Text = $"Scanning failed!";
                 }
                 finally
                 {
@@ -88,29 +90,28 @@ namespace Atsumari
         {
             if (isBusy) return;
 
-            ScanInfoBox.Text = $"Scannin...";
-
             if (e.Data.GetData(DataFormats.FileDrop) is string[] paths)
             {
                 isBusy = true;
+                ScanInfoBox.Text = $"Scanning...";
 
                 try
                 {
                     List<Item> newItems = await Task.Run(() => SearchPathsForExes(paths.ToList()));
 
                     AddItemsToList(newItems);
+                    ScanInfoBox.Text = $"Scan complete!";
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show("Scan failed:\n" + ex.Message);
+                    ScanInfoBox.Text = $"Scanning failed!";
                 }
                 finally
                 {
                     isBusy = false; 
                 }
             }
-
-            ScanInfoBox.Text = $"Scan complete!";
         }
 
         List<Item> SearchPathsForExes(List<string> paths)
