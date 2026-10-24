@@ -1,44 +1,55 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
+﻿using System.IO;
 using System.Text.Json;
 
 namespace Atsumari
 {
     public static class SaveManager
     {
-        public static List<Item> LoadJson()
+        public static string GetLibFolder()
         {
-            string json = GetFile();
-
-            if (File.Exists(json))
-            {
-                string file = File.ReadAllText(json);
-                List<Item>? back = JsonSerializer.Deserialize<List<Item>>(file) ?? new();
-                return back;
-            }
-            else
-            {
-                return new();
-            }
+            string folder = Path.Combine(GetAppFolder(), "Libraries");
+            Directory.CreateDirectory(folder);
+            return folder;
         }
 
-        public static void SaveJson(List<Item> items)
-        {
-            string text = JsonSerializer.Serialize(items);
-
-            string json = GetFile();
-
-            File.WriteAllText(json, text);
-        }
-
-        public static string GetFile()
+        public static string GetAppFolder()
         {
             string folder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Atsumari");
             Directory.CreateDirectory(folder);
 
-            return Path.Combine(folder, "Items.json");
+            return folder;
+        }
+
+        public static Library LoadLibrary(string filePath)
+        {
+            string text = File.ReadAllText(filePath);
+            Library library = JsonSerializer.Deserialize<Library>(text) ?? new Library();
+            library.ID = Path.GetFileNameWithoutExtension(filePath);
+            return library;
+        }
+
+        public static void SaveLibrary(Library library)
+        {
+            string text = JsonSerializer.Serialize(library);
+            string file = Path.Combine(GetLibFolder(), library.ID + ".json");
+            File.WriteAllText(file, text);
+        }
+
+        public static List<Library> LoadAllLibraries()
+        {
+            List<Library> librariesFound = new();
+
+            foreach (string file in Directory.GetFiles(GetLibFolder(), "*.json"))
+            {
+                try
+                {
+                    librariesFound.Add(LoadLibrary(file));
+                }
+                catch (JsonException) { }
+                catch (IOException) { } 
+            }
+
+            return librariesFound;
         }
     }
 }
