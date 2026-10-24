@@ -6,24 +6,23 @@ A personal Media library manager (For video and exe files)
 * Standard version, requires .NET 10 installed on system
 
 # To-do List
-<details>
-
-- [x] Can add Exe files to list.
+- [x] Add Exe
 - [x] Adding through folder
- - [x] Recursively finds exes
- - [x] Async
-- [x] Remove Exe files from list.
-- [x] Remove whole list button
+  - [x] Recursively finds exes
+  - [x] Async
+- [x] Remove Exe.
+  - [x] Remove Multiple
+- [x] Remove whole list
 - [x] Launching exes
- - [x] Dubble click item
- - [x] Launch button
+  - [x] Dubble click item
+  - [x] Launch button
 - [x] Icons and name fetching for each item
- - [x] Async 
-- [x] Renaming the exe reference in the programme
-- [x] Adding a search function
- - [x] Item name
- - [ ] Tags
- - [ ] Collections
+  - [x] Async 
+- [x] Rename an item
+- [x] Add a search function
+  - [x] Item name
+  - [ ] Tags
+  - [ ] Collections
 - [ ] Tagging
   - [ ] Adding
   - [ ] Removing
@@ -54,4 +53,3 @@ A personal Media library manager (For video and exe files)
   - [ ] (cant think of much else)
  
 - [ ] Mascot! Atsumari-chan (name pending)
-</details>
