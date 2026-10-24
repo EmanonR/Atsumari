@@ -1,11 +1,7 @@
-﻿using System.Windows;
-using Microsoft.Win32;
+﻿using System.ComponentModel;
 using System.IO;
-using System.Diagnostics;
-using System.Linq;
-using System.Windows.Media;
 using System.Text.Json.Serialization;
-using System.ComponentModel;
+using System.Windows.Media;
 
 namespace Atsumari
 {
