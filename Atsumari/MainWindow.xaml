@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Atsumari"
         mc:Ignorable="d"
-        Title="MainWindow" Height="720" Width="1280">
+        Title="Atsumari" Height="720" Width="1280">
 
     <Window.Resources>
         <Style TargetType="Button">
@@ -13,9 +13,8 @@
             <Setter Property="Padding" Value="10,5"/>
         </Style>
     </Window.Resources>
-    
+
     <Grid>
-        <!-- Vertical Split, Topbar, Tabs -->
         <Grid.RowDefinitions>
             <RowDefinition Height="25"/>
             <RowDefinition Height="*"/>
@@ -32,8 +31,8 @@
 
             <Border Grid.Column="0" BorderBrush="Gray" BorderThickness="1" Padding="15">
                 <StackPanel>
-                <TextBlock Foreground="Gray" Text="Collections here in future" />
-                <TextBlock Foreground="Gray" Text="Unused for now" />
+                    <TextBlock Foreground="Gray" Text="Collections here in future" />
+                    <TextBlock Foreground="Gray" Text="Unused for now" />
                 </StackPanel>
             </Border>
             <Grid Grid.Column="1">
@@ -43,14 +42,12 @@
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-                <Grid Grid.Row="0">
-                    <StackPanel Orientation="Horizontal">
-                        <Button Content="Remove Exe" Click="Remove_Click" />
-                        <Button Content="Remove All" Click="Remove_All" />
-                        <Button Content="Add Exe" Click="Add_Click" />
-                        <Button Content="Add Folder" Click="Add_Folder" />
-                    </StackPanel>
-                </Grid>
+                <StackPanel Grid.Row="0" Orientation="Horizontal">
+                    <Button Content="Remove Exe" Click="Remove_Click" />
+                    <Button Content="Remove All" Click="Remove_All" />
+                    <Button Content="Add Exe" Click="Add_Click" />
+                    <Button Content="Add Folder" Click="Add_Folder" />
+                </StackPanel>
                 <Grid Grid.Row="1">
                     <TextBox Padding="6,4" VerticalContentAlignment="Center" x:Name="FilterBox" TextChanged="FilterBox_TextChanged" />
                     <TextBlock Padding="6,4" VerticalAlignment="Center" Foreground="Gray" IsHitTestVisible="False" Text="Search...">
@@ -83,8 +80,8 @@
             <Border Grid.Column="2" BorderBrush="Gray" BorderThickness="1">
                 <StackPanel Orientation="Vertical">
                     <Image Source="{Binding SelectedItem.Icon, ElementName=ItemsListBox}" Width="80" Height="80" Margin="0,8,0,8"/>
-                    <TextBlock Text="Item name:" Width="Auto" Margin="10,0"/>
-                    <TextBox LostFocus="TextBox_LostFocus" Text="{Binding SelectedItem.displayName, ElementName=ItemsListBox, UpdateSourceTrigger=PropertyChanged}" Width="Auto" Margin="10,0"/>
+                    <TextBlock Text="Item name:" Margin="10,0"/>
+                    <TextBox LostFocus="TextBox_LostFocus" Text="{Binding SelectedItem.displayName, ElementName=ItemsListBox, UpdateSourceTrigger=PropertyChanged}" Margin="10,0"/>
                     <Button Content="Launch Exe" Click="Launch_Click" Margin="10,10,10,5" />
                     <Button Content="Open Directory" Click="OpenDirectory_Click" Margin="10,5,10,10"/>
                 </StackPanel>
