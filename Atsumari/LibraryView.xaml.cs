@@ -51,7 +51,7 @@ namespace Atsumari
             }
         }
 
-        private async void Add_Folder(object sender, RoutedEventArgs e)
+        private void Add_Folder(object sender, RoutedEventArgs e)
         {
             if (currentLibrary == null) return;
             if (isBusy) return;
@@ -60,58 +60,43 @@ namespace Atsumari
 
             if (dialog.ShowDialog() == true)
             {
-                isBusy = true;
-                ScanInfoBox.Text = $"Scanning...";
-
                 string path = dialog.FolderName;
 
-                try
-                {
-                    List<Item> newItems = await Task.Run(() => SearchPathForExes(path));
-
-                    AddItemsToList(newItems);
-                    ScanInfoBox.Text = $"Scan complete!";
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Scan failed:\n" + ex.Message);
-                    ScanInfoBox.Text = $"Scanning failed!";
-                }
-                finally
-                {
-                    isBusy = false;
-                }
+                StartScanOnPaths([path]);
             }
-
-
         }
 
-        async void Window_Drop(object sender, DragEventArgs e)
+        private void Window_Drop(object sender, DragEventArgs e)
         {
             if (currentLibrary == null) return;
             if (isBusy) return;
 
             if (e.Data.GetData(DataFormats.FileDrop) is string[] paths)
             {
-                isBusy = true;
-                ScanInfoBox.Text = $"Scanning...";
+                StartScanOnPaths(paths.ToList());
+            }
+        }
 
-                try
-                {
-                    List<Item> newItems = await Task.Run(() => SearchPathsForExes(paths.ToList()));
+        private async void StartScanOnPaths(List<string> paths)
+        {
+            isBusy = true;
+            ScanInfoBox.Text = $"Scanning...";
 
-                    AddItemsToList(newItems);
-                    ScanInfoBox.Text = $"Scan complete!";
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Scan failed:\n" + ex.Message);
-                    ScanInfoBox.Text = $"Scanning failed!";
-                }
-                finally
-                {
-                    isBusy = false;
-                }
+            try
+            {
+                List<Item> newItems = await Task.Run(() => SearchPathsForExes(paths.ToList()));
+
+                AddItemsToList(newItems);
+                ScanInfoBox.Text = $"Scan complete!";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Scan failed:\n" + ex.Message);
+                ScanInfoBox.Text = $"Scanning failed!";
+            }
+            finally
+            {
+                isBusy = false;
             }
         }
 
@@ -130,7 +115,7 @@ namespace Atsumari
                 {
                     // File
 
-                    //Check if exe
+                    // Ignore if not exe
                     if (!string.Equals(Path.GetExtension(path), ".exe", StringComparison.OrdinalIgnoreCase)) continue;
 
                     newItems.Add(new Item(path));
@@ -146,9 +131,9 @@ namespace Atsumari
             List<Item> newItems = new();
 
             string? best = Directory.GetFiles(path, "*.exe")
-                .Where(f => !skip.Any(w => Path.GetFileName(f).Contains(w, StringComparison.OrdinalIgnoreCase)))
-                .FirstOrDefault();
+                .FirstOrDefault(f => !skip.Any(w => Path.GetFileName(f).Contains(w, StringComparison.OrdinalIgnoreCase)));
 
+            //Gather subfolders
             string[] subs = Directory.GetDirectories(path);
 
             if (best != null)
@@ -159,15 +144,13 @@ namespace Atsumari
                 return newItems;
             }
 
-            //Gather subfolders
-
-
             //Return if no subs
             if (subs.Length == 0) return new();
 
-            //search in them
+            //search in subfolders
             foreach (string sub in subs)
             {
+                //Recursion
                 newItems.AddRange(SearchPathForExes(sub));
             }
 
@@ -213,18 +196,13 @@ namespace Atsumari
             if (answer != MessageBoxResult.Yes) return;
 
             if (chosen.Count == 1)
-            {
                 ScanInfoBox.Text = $"Removed {chosen[0].displayName}.";
-            }
             else
-            {
                 ScanInfoBox.Text = $"Removed {chosen.Count} items.";
-            }
 
             foreach (var item in chosen)
-            {
                 currentLibrary.itemsInLibrary.Remove(item);
-            }
+
             SaveManager.SaveLibrary(currentLibrary);
             RefreshList();
         }
@@ -243,18 +221,18 @@ namespace Atsumari
             ScanInfoBox.Text = $"Removed {removeCount} items.";
         }
 
-        private void Launch_Click(object sender, RoutedEventArgs e) => LaunchExe();
-
         private void OpenDirectory_Click(object sender, RoutedEventArgs e)
         {
             if (ItemsListBox.SelectedItem == null) return;
 
-            Item item = ItemsListBox.SelectedItem as Item;
+            Item? item = ItemsListBox.SelectedItem as Item;
 
             Process.Start("explorer.exe", $"/select,\"{item.filePath}\"");
         }
 
         private void ItemList_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e) => LaunchExe();
+
+        private void Launch_Click(object sender, RoutedEventArgs e) => LaunchExe();
 
         void LaunchExe()
         {
@@ -266,13 +244,13 @@ namespace Atsumari
 
             if (ItemsListBox.SelectedItem is not Item item)
             {
-                MessageBox.Show("Select one first.");
+                MessageBox.Show("Select an item to launch.");
                 return;
             }
 
             if (string.IsNullOrEmpty(item.filePath))
             {
-                MessageBox.Show("This item has no exe.");
+                MessageBox.Show("Path to item does not exist.");
                 return;
             }
 
@@ -290,12 +268,9 @@ namespace Atsumari
             }
         }
 
-        private void RefreshList()
-        {
-            _itemsView.Refresh();
-        }
+        private void FilterBox_TextChanged(object sender, TextChangedEventArgs e) => RefreshList();
 
-        private void FilterBox_TextChanged(object sender, TextChangedEventArgs e)
+        private void RefreshList()
         {
             _itemsView.Refresh();
         }
