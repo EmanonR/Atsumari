@@ -10,7 +10,7 @@ namespace Atsumari
 {
     public partial class LibraryView : UserControl
     {
-        string[] skip = { "unins", "crash" , "config", "install" , "setup"};
+        string[] skip = { "unins", "crash", "config", "install" , "setup"};
 
         private ICollectionView _itemsView = null!;
         private Library currentLibrary = null!;
