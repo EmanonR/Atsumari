@@ -15,7 +15,6 @@ namespace Atsumari
 
         private readonly ICollectionView _itemsView;
         private List<Item> items = new();
-        private Item selectedItem;
 
         private bool isBusy;
 
@@ -39,7 +38,7 @@ namespace Atsumari
 
             if (dialog.ShowDialog() == true)
             {
-                bool exists = items.Any(i => i.originalName == Path.GetFileNameWithoutExtension(dialog.FileName));
+                bool exists = CheckForDuplicate(dialog.FileName);
 
                 if (exists)
                 {
@@ -55,13 +54,14 @@ namespace Atsumari
         {
             if (isBusy) return;
 
-            ScanInfoBox.Text = $"Scannin...";
 
             var dialog = new OpenFolderDialog { Title = "Pick a folder" };
 
             if (dialog.ShowDialog() == true)
             {
                 isBusy = true;
+                ScanInfoBox.Text = $"Scanning...";
+
                 string path = dialog.FolderName;
 
                 try
@@ -69,10 +69,12 @@ namespace Atsumari
                     List<Item> newItems = await Task.Run(() => SearchPathForExes(path));
 
                     AddItemsToList(newItems);
+                    ScanInfoBox.Text = $"Scan complete!";
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show("Scan failed:\n" + ex.Message);
+                    ScanInfoBox.Text = $"Scanning failed!";
                 }
                 finally
                 {
@@ -80,36 +82,35 @@ namespace Atsumari
                 }
             }
 
-            ScanInfoBox.Text = $"Scan complete!";
+
         }
 
         async void Window_Drop(object sender, DragEventArgs e)
         {
             if (isBusy) return;
 
-            ScanInfoBox.Text = $"Scannin...";
-
             if (e.Data.GetData(DataFormats.FileDrop) is string[] paths)
             {
                 isBusy = true;
+                ScanInfoBox.Text = $"Scanning...";
 
                 try
                 {
                     List<Item> newItems = await Task.Run(() => SearchPathsForExes(paths.ToList()));
 
                     AddItemsToList(newItems);
+                    ScanInfoBox.Text = $"Scan complete!";
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show("Scan failed:\n" + ex.Message);
+                    ScanInfoBox.Text = $"Scanning failed!";
                 }
                 finally
                 {
                     isBusy = false; 
                 }
             }
-
-            ScanInfoBox.Text = $"Scan complete!";
         }
 
         List<Item> SearchPathsForExes(List<string> paths)
@@ -178,6 +179,10 @@ namespace Atsumari
 
             foreach (var item in newItems)
             {
+                bool exists = CheckForDuplicate(item.filePath);
+
+                if (exists) continue;
+
                 items.Add(item);
             }
 
@@ -185,6 +190,11 @@ namespace Atsumari
 
             //Save json
             SaveManager.SaveJson(items);
+        }
+
+        private bool CheckForDuplicate(string checkPath)
+        {
+            return items.Any(i => String.Equals(i.filePath, checkPath, StringComparison.OrdinalIgnoreCase));
         }
 
         private void Remove_Click(object sender, RoutedEventArgs e)
@@ -234,6 +244,15 @@ namespace Atsumari
 
         private void Launch_Click(object sender, RoutedEventArgs e) => LaunchExe();
 
+        private void OpenDirectory_Click(object sender, RoutedEventArgs e)
+        {
+            if (ItemsListBox.SelectedItem == null) return;
+
+            Item item = ItemsListBox.SelectedItem as Item;
+
+            Process.Start("explorer.exe", $"/select,\"{item.filePath}\"");
+        }
+
         private void ItemList_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e) => LaunchExe(); 
 
         void LaunchExe()
@@ -275,29 +294,14 @@ namespace Atsumari
             _itemsView.Refresh();
         }
 
-        private void ItemList_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
-        {
-            if (ItemsListBox.SelectedItem is Item item)
-            {
-                selectedItem = item;
-
-                selectedItemInput.Text = selectedItem.displayName;
-                selectedItemIcon.Source = selectedItem.Icon;
-            }
-        }
-
-        private void selectedItemInput_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
-        {
-            if (selectedItem == null) return;
-
-            selectedItem.displayName = selectedItemInput.Text;
-            SaveManager.SaveJson(items);
-            RefreshList();
-        }
-
         private void FilterBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             _itemsView.Refresh();
+        }
+
+        private void TextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            SaveManager.SaveJson(items);
         }
     }
 }

@@ -5,70 +5,85 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Atsumari"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Atsumari" Height="720" Width="1280">
+
+    <Window.Resources>
+        <Style TargetType="Button">
+            <Setter Property="Margin" Value="5,10"/>
+            <Setter Property="Padding" Value="10,5"/>
+        </Style>
+    </Window.Resources>
+
     <Grid>
-        <!-- Vertical Split, Topbar, Tabs -->
         <Grid.RowDefinitions>
             <RowDefinition Height="25"/>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <Border Grid.Row="0" BorderBrush="Gray" BorderThickness="1"/>
-        <Border Grid.Row="1" BorderBrush="Gray" BorderThickness="1">
-            <StackPanel Orientation="Horizontal">
-                <Button Content="Remove Exe" Click="Remove_Click" Margin="5, 10" Padding="10,5" />
-                <Button Content="Remove All" Click="Remove_All" Margin="5, 10" Padding="10,5" />
-                <Button Content="Add Exe" Click="Add_Click" Margin="5, 10" Padding="10,5" />
-                <Button Content="Add Folder" Click="Add_Folder" Margin="5,10" Padding="10,5" />
-                <Button Content="Launch Exe" Click="Launch_Click" Margin="5,10" Padding="10,5" />
-            </StackPanel>
+        <Border Grid.Row="0" BorderBrush="Gray" BorderThickness="1">
+            <TextBlock Foreground="Gray" VerticalAlignment="Center" Text="Libraries goes here... not implemented yet" />
         </Border>
-        <Grid Grid.Row="2">
+        <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="150"/>
+                <ColumnDefinition Width="200"/>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="150"/>
+                <ColumnDefinition Width="200"/>
             </Grid.ColumnDefinitions>
 
-            <Border Grid.Column="0" BorderBrush="Gray" BorderThickness="1">
+            <Border Grid.Column="0" BorderBrush="Gray" BorderThickness="1" Padding="15">
+                <StackPanel>
+                    <TextBlock Foreground="Gray" Text="Collections here in future" />
+                    <TextBlock Foreground="Gray" Text="Unused for now" />
+                </StackPanel>
             </Border>
             <Grid Grid.Column="1">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-                <TextBox Padding="6,4" VerticalContentAlignment="Center" x:Name="FilterBox" TextChanged="FilterBox_TextChanged" />
-                <TextBlock Padding="6,4" VerticalAlignment="Center" Foreground="Gray" IsHitTestVisible="False" Text="Search...">
-                    <TextBlock.Style>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding Text, ElementName=FilterBox}" Value="">
-                                    <Setter Property="Visibility" Value="Visible"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </TextBlock.Style>
-                </TextBlock>
-                <ListBox Grid.Row="1" x:Name="ItemsListBox" SelectionChanged="ItemList_SelectionChanged"  MouseDoubleClick="ItemList_MouseDoubleClick" SelectionMode="Extended">
+                <StackPanel Grid.Row="0" Orientation="Horizontal">
+                    <Button Content="Remove Exe" Click="Remove_Click" />
+                    <Button Content="Remove All" Click="Remove_All" />
+                    <Button Content="Add Exe" Click="Add_Click" />
+                    <Button Content="Add Folder" Click="Add_Folder" />
+                </StackPanel>
+                <Grid Grid.Row="1">
+                    <TextBox Padding="6,4" VerticalContentAlignment="Center" x:Name="FilterBox" TextChanged="FilterBox_TextChanged" />
+                    <TextBlock Padding="6,4" VerticalAlignment="Center" Foreground="Gray" IsHitTestVisible="False" Text="Search...">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Text, ElementName=FilterBox}" Value="">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Grid>
+                <ListBox Grid.Row="2" x:Name="ItemsListBox" MouseDoubleClick="ItemList_MouseDoubleClick" SelectionMode="Extended">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
-                                <Image Source="{Binding Icon}" Width="20" Height="20" Margin="0,0,8,0"/>
+                                <Image Source="{Binding Icon}" Width="20" Height="20" Margin="8,0,8,0"/>
                                 <TextBlock Text="{Binding displayName}" VerticalAlignment="Center"/>
                             </StackPanel>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
-                <Border Grid.Row="2" BorderBrush="Gray" BorderThickness="1">
-                    <TextBlock x:Name="ScanInfoBox" Height="25"/>
+                <Border Grid.Row="3" BorderBrush="Gray" BorderThickness="1">
+                    <TextBlock Foreground="Gray" Text="Status..." x:Name="ScanInfoBox" MinHeight="25" Padding="5"/>
                 </Border>
             </Grid>
             <Border Grid.Column="2" BorderBrush="Gray" BorderThickness="1">
                 <StackPanel Orientation="Vertical">
-                    <Image x:Name="selectedItemIcon" Width="80" Height="80" Margin="0,0,8,0"/>
-                    <TextBox TextChanged="selectedItemInput_TextChanged" x:Name="selectedItemInput" Text="Hello" HorizontalAlignment="Center" />
+                    <Image Source="{Binding SelectedItem.Icon, ElementName=ItemsListBox}" Width="80" Height="80" Margin="0,8,0,8"/>
+                    <TextBlock Text="Item name:" Margin="10,0"/>
+                    <TextBox LostFocus="TextBox_LostFocus" Text="{Binding SelectedItem.displayName, ElementName=ItemsListBox, UpdateSourceTrigger=PropertyChanged}" Margin="10,0"/>
+                    <Button Content="Launch Exe" Click="Launch_Click" Margin="10,10,10,5" />
+                    <Button Content="Open Directory" Click="OpenDirectory_Click" Margin="10,5,10,10"/>
                 </StackPanel>
             </Border>
         </Grid>
