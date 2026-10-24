@@ -35,6 +35,12 @@ namespace Atsumari
             File.WriteAllText(file, text);
         }
 
+        public static void RemoveLibrary(Library library)
+        {
+            string path = Path.Combine(GetLibFolder(), library.ID + ".json");
+            File.Delete(path);
+        }
+
         public static List<Library> LoadAllLibraries()
         {
             List<Library> librariesFound = new();
