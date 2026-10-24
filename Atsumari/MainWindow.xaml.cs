@@ -38,7 +38,7 @@ namespace Atsumari
 
             if (dialog.ShowDialog() == true)
             {
-                bool exists = items.Any(i => String.Equals(i.filePath, dialog.FileName, StringComparison.OrdinalIgnoreCase));
+                bool exists = CheckForDuplicate(dialog.FileName);
 
                 if (exists)
                 {
@@ -179,6 +179,10 @@ namespace Atsumari
 
             foreach (var item in newItems)
             {
+                bool exists = CheckForDuplicate(item.filePath);
+
+                if (exists) continue;
+
                 items.Add(item);
             }
 
@@ -186,6 +190,11 @@ namespace Atsumari
 
             //Save json
             SaveManager.SaveJson(items);
+        }
+
+        private bool CheckForDuplicate(string checkPath)
+        {
+            return items.Any(i => String.Equals(i.filePath, checkPath, StringComparison.OrdinalIgnoreCase));
         }
 
         private void Remove_Click(object sender, RoutedEventArgs e)
