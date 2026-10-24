@@ -7,6 +7,9 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
-        <Button Click="OpenDir_Click" Content="Open Save Directory" Width="125" Height="25"/>
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Button Click="OpenDir_Click" Content="Open Save Directory" Margin="5" Padding="8,3" Width="Auto" Height="Auto"/>
+            <Button Click="DarkmodeToggle_Click" Content="Dark Mode" Margin="5" Padding="8,3" Width="Auto" Height="Auto" IsEnabled="False"/>
+        </StackPanel>
     </Grid>
 </UserControl>

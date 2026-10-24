@@ -14,9 +14,6 @@ using System.Windows.Shapes;
 
 namespace Atsumari
 {
-    /// <summary>
-    /// Interaction logic for SettingsView.xaml
-    /// </summary>
     public partial class SettingsView : UserControl
     {
         public SettingsView()
@@ -28,6 +25,11 @@ namespace Atsumari
         {
             string path = SaveManager.GetLibFolder();
             Process.Start("explorer.exe", $"/select,\"{path}\"");
+        }
+
+        private void DarkmodeToggle_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }
