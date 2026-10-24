@@ -5,32 +5,53 @@ A personal Media library manager (For video and exe files)
 * Standalone - Runs self contained, needs no other installs
 * Standard version, requires .NET 10 installed on system
 
-# Current
-* Can add Exe files to list.
-* Adding a folder makes it search its contents for exe files, ignoring a few certain types like uninstall files. Recursively searching its subfolders, when one exe is found, it can add more in the directory, but it wont search further subfolders.
-* Remove Exe files from list.
-* Launch exes, either through the dedicated button (prob will remove it) and doubble clicking said exe.
-* Icons and name fetching for each exe
-* Renaming the exe reference in the programme
-* Adding a search function
+# To-do List
+<details>
 
-# Plans
-* Tagging
-  * Tags also searchable
-* grouping into collections
-  * Default groups like "Ungrouped"
-  * "Untagged"
-* Sorting list
-  * alphabetical
-  * playtime?
-  * playcount?
-  * personal rating
-* Multiple libraries
-* Support for Video library and not just exe library
-* Settings
-  * Dark mode
-  * custom json save location
-  * Delete Json/Library
-  * (cant think of much else)
+- [x] Can add Exe files to list.
+- [x] Adding through folder
+ - [x] Recursively finds exes
+ - [x] Async
+- [x] Remove Exe files from list.
+- [x] Remove whole list button
+- [x] Launching exes
+ - [x] Dubble click item
+ - [x] Launch button
+- [x] Icons and name fetching for each item
+ - [x] Async 
+- [x] Renaming the exe reference in the programme
+- [x] Adding a search function
+ - [x] Item name
+ - [ ] Tags
+ - [ ] Collections
+- [ ] Tagging
+  - [ ] Adding
+  - [ ] Removing
+- [ ] grouping into collections
+  - [ ] Default collections
+   - [ ] Untouched
+   - [ ] Untagged
+   - [ ] Uncollected
+  - [ ] Adding custom collections
+  - [ ] Removing collections
+   - [ ] Removes collection from all items that had it
+- [ ] Sorting list
+  - [ ] alphabetical
+  - [ ] playtime
+  - [ ] playcount
+  - [ ] personal rating
+  - [ ] Flip sort order
+- [ ] Multiple libraries
+ - [ ] Exe library
+ - [ ] Video library
+ - [ ] Deleting libraries
+ - [ ] Adding libraries
+ - [ ] Renaming libraries
+- [ ] Settings
+  - [ ] Dark mode
+  - [ ] custom json save location
+  - [ ] Delete Json/Library
+  - [ ] (cant think of much else)
  
-* Mascot! Atsumari-chan (name pending)
+- [ ] Mascot! Atsumari-chan (name pending)
+</details>
