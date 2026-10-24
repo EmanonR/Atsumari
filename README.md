@@ -1,9 +1,10 @@
 # Atsumari
 A personal Media library manager (For video and exe files)
+Windows only
 
 # The two versions
-* Standalone - Runs self contained, needs no other installs
-* Standard version, requires .NET 10 installed on system
+* Standalone - Runs self contained, requires no further installs
+* Standard - requires .NET 10 installed on system
 
 # To-do List
 - [x] Add Exe
