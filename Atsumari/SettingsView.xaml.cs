@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -21,6 +22,12 @@ namespace Atsumari
         public SettingsView()
         {
             InitializeComponent();
+        }
+
+        private void OpenDir_Click(object sender, RoutedEventArgs e)
+        {
+            string path = SaveManager.GetLibFolder();
+            Process.Start("explorer.exe", $"/select,\"{path}\"");
         }
     }
 }
