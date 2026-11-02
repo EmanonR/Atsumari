@@ -42,8 +42,46 @@ namespace Atsumari
 
             ItemsListBox.ItemsSource = library.itemsInLibrary;
             _itemsView = CollectionViewSource.GetDefaultView(library.itemsInLibrary);
-            _itemsView.Filter = item => string.IsNullOrWhiteSpace(FilterBox.Text) || ((Item)item).displayName.Contains(FilterBox.Text, StringComparison.OrdinalIgnoreCase);
+            _itemsView.Filter = FilterItem;
+            
             ShowTags();
+            return true;
+        }
+
+        bool FilterItem(object item)
+        {
+            if (string.IsNullOrWhiteSpace(FilterBox.Text))
+                return true;
+
+            Item currentItem = (Item)item;
+            string displayName = currentItem.displayName;
+            string[] words = FilterBox.Text.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+            foreach (string word in words)
+            {
+                bool found = false;
+
+                // Check name
+                if (displayName.Contains(word, StringComparison.OrdinalIgnoreCase))
+                    found = true;
+
+                // Check tags
+                if (!found)
+                {
+                    foreach (string tag in currentItem.tags)
+                    {
+                        if (tag.Contains(word, StringComparison.OrdinalIgnoreCase))
+                        {
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!found)
+                    return false;
+            }
+
             return true;
         }
 
