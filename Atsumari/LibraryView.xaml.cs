@@ -279,5 +279,15 @@ namespace Atsumari
         {
             SaveManager.SaveLibrary(currentLibrary);
         }
+
+        private void CatagorySearch_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
+        }
+
+        private void CatagoryListBox_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+
+        }
     }
 }
