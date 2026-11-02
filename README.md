@@ -23,11 +23,11 @@ Windows only
 - [x] Rename an item
 - [x] Add a search function
   - [x] Item name
-  - [ ] Tags
+  - [x] Tags
   - [ ] Collections
-- [ ] Tagging
-  - [ ] Adding
-  - [ ] Removing
+- [x] Tagging
+  - [x] Adding
+  - [x] Removing
 - [ ] grouping into collections
   - [ ] Default collections
    - [ ] Untouched
