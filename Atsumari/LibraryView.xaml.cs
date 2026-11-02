@@ -4,7 +4,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
+using System.Xml.Linq;
 
 namespace Atsumari
 {
@@ -16,9 +18,20 @@ namespace Atsumari
         private Library currentLibrary = null!;
         private bool isBusy;
 
+        public string? openLibraryId => currentLibrary?.ID;
+
         public LibraryView()
         {
             InitializeComponent();
+        }
+
+        public void CloseLibrary()
+        {
+            FilterBox.Text = "";
+            ScanInfoBox.Text = "";
+            currentLibrary = null!;
+            ItemsListBox.ItemsSource = null;
+            TagList.ItemsSource = null;
         }
 
         public bool OpenLibrary(Library library)
@@ -30,6 +43,7 @@ namespace Atsumari
             ItemsListBox.ItemsSource = library.itemsInLibrary;
             _itemsView = CollectionViewSource.GetDefaultView(library.itemsInLibrary);
             _itemsView.Filter = item => string.IsNullOrWhiteSpace(FilterBox.Text) || ((Item)item).displayName.Contains(FilterBox.Text, StringComparison.OrdinalIgnoreCase);
+            ShowTags();
             return true;
         }
 
@@ -84,7 +98,10 @@ namespace Atsumari
 
             try
             {
+                Library target = currentLibrary;
                 List<Item> newItems = await Task.Run(() => SearchPathsForExes(paths.ToList()));
+
+                if (currentLibrary != target) return;
 
                 AddItemsToList(newItems);
                 ScanInfoBox.Text = $"Scan complete!";
@@ -277,6 +294,8 @@ namespace Atsumari
 
         private void TextBox_LostFocus(object sender, RoutedEventArgs e)
         {
+            if (currentLibrary == null) return;
+
             SaveManager.SaveLibrary(currentLibrary);
         }
 
@@ -312,6 +331,120 @@ namespace Atsumari
 
             var category = ((FrameworkElement)sender).DataContext;
             // remove it from whatever collection backs CatagoryListBox, then save
+        }
+
+        private void DeleteTag_Click(object sender, RoutedEventArgs e)
+        {
+            e.Handled = true;
+
+            if (((FrameworkElement)sender).DataContext is not TagRow row) return;
+
+            var answer = MessageBox.Show($"Delete tag {row.tagName}? It will be removed from the whole library.",
+                "Delete tag", MessageBoxButton.YesNo,MessageBoxImage.Question);
+
+            if (answer != MessageBoxResult.Yes) return;
+
+            foreach (Item item in currentLibrary.itemsInLibrary)
+            {
+                item.RemoveTag(row.tagName);
+            }
+
+            for (int i = currentLibrary.tagNames.Count - 1; i >= 0; i--)
+            {
+                if (string.Equals(row.tagName, currentLibrary.tagNames[i], StringComparison.OrdinalIgnoreCase))
+                    currentLibrary.tagNames.RemoveAt(i);
+            }
+
+            SaveManager.SaveLibrary(currentLibrary);
+            ShowTags();
+            ScanInfoBox.Text = "Deleted " + row.tagName;
+        }
+
+        private void AddTag_Click(object sender, RoutedEventArgs e)
+        {
+            if (currentLibrary == null) return;
+
+            string name = TagInput.Text.Trim();
+
+            string? problem = CheckTag(name);
+            if (problem != null)
+            {
+                ScanInfoBox.Text = problem;
+                return;
+            }
+
+            currentLibrary.tagNames.Add(name);
+            SaveManager.SaveLibrary(currentLibrary);
+            ShowTags();
+            TagInput.Text = "";
+            ScanInfoBox.Text = "Added " + name;
+        }
+
+        string? CheckTag(string name)
+        {
+            if (name.Length == 0) return "Name a tag first.";
+
+            foreach (string tag in currentLibrary.tagNames)
+            {
+                if (string.Equals(tag, name, StringComparison.OrdinalIgnoreCase))
+                    return "That tag already exists";
+            }
+
+            return null;
+        }
+
+        void ShowTags()
+        {
+            if (currentLibrary == null)
+            {
+                TagList.ItemsSource = null;
+                return;
+            }
+
+            Item? selected = ItemsListBox.SelectedItem as Item;
+
+            List<TagRow> rows = new();
+
+            foreach (string tag in currentLibrary.tagNames)
+            {
+                bool has = false;
+
+                if (selected != null)
+                    has = selected.HasTag(tag);
+
+                rows.Add(new TagRow { tagName = tag, isChecked = has });
+            }
+
+            TagList.ItemsSource = rows;
+        }
+
+        private void ItemsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e) => ShowTags();
+
+        private void TagCheck_Click(object sender, RoutedEventArgs e)
+        {
+            if (((FrameworkElement)sender).DataContext is not TagRow row) return;
+
+            Item? item = ItemsListBox.SelectedItem as Item;
+            if (item == null)
+            {
+                ScanInfoBox.Text = "Select an item first";
+                ShowTags();
+                return;
+            }
+
+            bool ticked = ((CheckBox)sender).IsChecked == true;
+
+            if (ticked)
+            {
+                if (!item.HasTag(row.tagName))
+                    item.tags.Add(row.tagName);
+            }
+            else
+            {
+                item.RemoveTag(row.tagName);
+            }
+
+            SaveManager.SaveLibrary(currentLibrary);
         }
     }
 }

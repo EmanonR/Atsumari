@@ -26,6 +26,14 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+
+        <Style x:Key="RowAddButton" TargetType="Button" BasedOn="{StaticResource RowDeleteButton}">
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Foreground" Value="Green"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </UserControl.Resources>
 
     <Grid Background="Transparent">
@@ -110,7 +118,8 @@
                      MouseDoubleClick="ItemList_MouseDoubleClick"
                      SelectionMode="Extended"
                      HorizontalContentAlignment="Stretch"
-                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                     SelectionChanged="ItemsListBox_SelectionChanged">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <Grid>
@@ -153,14 +162,40 @@
                 </StackPanel>
             </Grid>
             <Grid Grid.Row="2" >
-                <ListBox x:Name="TagList" Margin="10,5" Height="Auto">
-
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <ListBox Grid.Row="0" x:Name="TagList" Margin="10,5,10,0" Height="Auto"
+                         HorizontalContentAlignment="Stretch"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <CheckBox IsChecked="{Binding isChecked}" Click="TagCheck_Click"/>
+                                <TextBlock Grid.Column="1" Text="{Binding tagName}" VerticalAlignment="Center"
+                                        TextTrimming="CharacterEllipsis"/>
+                                <Button Grid.Column="2" Content="✕" Style="{StaticResource RowDeleteButton}"
+                                        Click="DeleteTag_Click"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
                 </ListBox>
-            </Grid>
-            <Grid Grid.Row="3" >
-                <ListBox x:Name="CollectionList" Margin="10,5" Height="Auto">
-
-                </ListBox>
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="TagInput" Margin="10,0,0,0"/>
+                    <Button Grid.Column="1" Content="+" Style="{StaticResource RowAddButton}"
+                            Click="AddTag_Click"
+                            Margin="0,0,10,0"/>
+                </Grid>
             </Grid>
         </Grid>
     </Grid>

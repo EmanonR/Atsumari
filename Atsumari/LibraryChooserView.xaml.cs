@@ -10,6 +10,7 @@ namespace Atsumari
         List<Library> loadedLibraries = new();
 
         public event Action<Library>? libraryChosen;
+        public event Action<Library>? libraryDeleted;
 
         public LibraryChooserView()
         {
@@ -87,6 +88,8 @@ namespace Atsumari
             ChooserMessage.Text = "Removed " + libraryRemovedName;
 
             LoadLibraries();
+
+            libraryDeleted?.Invoke(chosen);
         }
     }
 }

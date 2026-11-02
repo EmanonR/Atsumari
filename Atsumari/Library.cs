@@ -9,5 +9,6 @@ namespace Atsumari
 
         public string libraryName { get; set; } = "";
         public List<Item> itemsInLibrary { get; set; } = new();
+        public List<string> tagNames { get; set; } = new();
     }
 }
