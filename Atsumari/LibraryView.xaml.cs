@@ -289,5 +289,29 @@ namespace Atsumari
         {
 
         }
+
+        private void DeleteItem_Click(object sender, RoutedEventArgs e)
+        {
+            e.Handled = true;
+
+            if (((FrameworkElement)sender).DataContext is not Item item) return;
+
+            var answer = MessageBox.Show($"Remove {item.displayName}?", "Remove item",
+                MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (answer != MessageBoxResult.Yes) return;
+
+            currentLibrary.itemsInLibrary.Remove(item);
+            SaveManager.SaveLibrary(currentLibrary);
+            RefreshList();
+            ScanInfoBox.Text = $"Removed {item.displayName}.";
+        }
+
+        private void DeleteCollection_Click(object sender, RoutedEventArgs e)
+        {
+            e.Handled = true;
+
+            var category = ((FrameworkElement)sender).DataContext;
+            // remove it from whatever collection backs CatagoryListBox, then save
+        }
     }
 }

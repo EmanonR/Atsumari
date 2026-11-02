@@ -8,6 +8,26 @@
              xmlns:local="clr-namespace:Atsumari"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+
+    <UserControl.Resources>
+        <Style x:Key="RowDeleteButton" TargetType="Button">
+            <Setter Property="Width" Value="20"/>
+            <Setter Property="Height" Value="20"/>
+            <Setter Property="Margin" Value="6,0,0,0"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="Gray"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Foreground" Value="Red"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
     <Grid Background="Transparent">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="250"/>
@@ -37,10 +57,23 @@
                     </TextBlock.Style>
                 </TextBlock>
             </Grid>
-            <ListBox Grid.Row="2" x:Name="CatagoryListBox" MouseDoubleClick="CatagoryListBox_MouseDoubleClick" SelectionMode="Single">
+            <ListBox Grid.Row="2" x:Name="CatagoryListBox" 
+                     MouseDoubleClick="CatagoryListBox_MouseDoubleClick" 
+                     SelectionMode="Single"
+                     HorizontalContentAlignment="Stretch"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <TextBlock Text="{Binding catagoryName}" VerticalAlignment="Center"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="{Binding catagoryName}" VerticalAlignment="Center"
+                                       TextTrimming="CharacterEllipsis"/>
+                            <Button Grid.Column="1" Content="✕" Style="{StaticResource RowDeleteButton}"
+                                    Click="DeleteCollection_Click"/>
+                        </Grid>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
@@ -73,13 +106,25 @@
                     </TextBlock.Style>
                 </TextBlock>
             </Grid>
-            <ListBox Grid.Row="2" x:Name="ItemsListBox" MouseDoubleClick="ItemList_MouseDoubleClick" SelectionMode="Extended">
+            <ListBox Grid.Row="2" x:Name="ItemsListBox"
+                     MouseDoubleClick="ItemList_MouseDoubleClick"
+                     SelectionMode="Extended"
+                     HorizontalContentAlignment="Stretch"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <StackPanel Orientation="Horizontal">
-                            <Image Source="{Binding Icon}" Width="20" Height="20" Margin="8,0,8,0"/>
-                            <TextBlock Text="{Binding displayName}" VerticalAlignment="Center"/>
-                        </StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Image Source="{Binding Icon}" Width="20" Height="20" Margin="8,0"/>
+                            <TextBlock Grid.Column="1" Text="{Binding displayName}" VerticalAlignment="Center"
+                                       TextTrimming="CharacterEllipsis"/>
+                            <Button Grid.Column="2" Content="✕" Style="{StaticResource RowDeleteButton}"
+                                    Click="DeleteItem_Click"/>
+                        </Grid>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
@@ -87,16 +132,36 @@
                 <TextBlock Foreground="Gray" Text="Status..." x:Name="ScanInfoBox" MinHeight="25" Padding="5"/>
             </Border>
         </Grid>
-        <Border Grid.Column="2" BorderBrush="Gray" BorderThickness="1">
-            <StackPanel Orientation="Vertical">
-                <Image Source="{Binding SelectedItem.Icon, ElementName=ItemsListBox}" Width="80" Height="80" Margin="0,8,0,8"/>
-                <TextBlock Text="Item name:" Margin="10,0"/>
-                <TextBox LostFocus="TextBox_LostFocus" Text="{Binding SelectedItem.displayName, ElementName=ItemsListBox, UpdateSourceTrigger=PropertyChanged}" Margin="10,0"/>
-                <StackPanel Orientation="Horizontal">
-                    <Button Content="Launch Exe" Click="Launch_Click" Margin="10,5" />
-                    <Button Content="Open Directory" Click="OpenDirectory_Click" Margin="10,5"/>
+        <Grid Grid.Column="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0">
+                <StackPanel>
+                    <Image Source="{Binding SelectedItem.Icon, ElementName=ItemsListBox}" Width="80" Height="80" Margin="0,8,0,8"/>
+                    <TextBlock Text="Item name:" Margin="10,0"/>
+                    <TextBox LostFocus="TextBox_LostFocus" Text="{Binding SelectedItem.displayName, ElementName=ItemsListBox, UpdateSourceTrigger=PropertyChanged}" Margin="10,0"/>
                 </StackPanel>
-            </StackPanel>
-        </Border>
+            </Grid>
+            <Grid Grid.Row="1">
+                <StackPanel Orientation="Horizontal">
+                    <Button Content="Launch Exe" Click="Launch_Click" Margin="15,5,5,5" />
+                    <Button Content="Open Directory" Click="OpenDirectory_Click" Margin="5,5,15,5"/>
+                </StackPanel>
+            </Grid>
+            <Grid Grid.Row="2" >
+                <ListBox x:Name="TagList" Margin="10,5" Height="Auto">
+
+                </ListBox>
+            </Grid>
+            <Grid Grid.Row="3" >
+                <ListBox x:Name="CollectionList" Margin="10,5" Height="Auto">
+
+                </ListBox>
+            </Grid>
+        </Grid>
     </Grid>
 </UserControl>

@@ -10,6 +10,8 @@ namespace Atsumari
         public string originalName { get; set; } = Path.GetFileNameWithoutExtension(filePath);
         private string _displayName = Path.GetFileNameWithoutExtension(filePath);
         public string filePath { get; set; } = filePath;
+        public int rating { get; set; } = 0;
+        public bool favorite { get; set; } = false;
         public List<string> tags { get; set; } = new();
         public List<string> collections { get; set; } = new();
 
