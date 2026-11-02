@@ -38,9 +38,11 @@
 
     <Grid Background="Transparent">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="250"/>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="250" MinWidth="150"/>
             <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*" MinWidth="200"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto" MinWidth="200"/>
         </Grid.ColumnDefinitions>
 
         <Grid Grid.Column="0">
@@ -86,7 +88,14 @@
                 </ListBox.ItemTemplate>
             </ListBox>
         </Grid>
-        <Grid Grid.Column="1">
+
+        <GridSplitter Grid.Column="1"
+                      Width="3"
+                      HorizontalAlignment="Stretch"
+                      Background="Gray"
+                      ShowsPreview="True"/>
+
+        <Grid Grid.Column="2">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -141,7 +150,14 @@
                 <TextBlock Foreground="Gray" Text="Status..." x:Name="ScanInfoBox" MinHeight="25" Padding="5"/>
             </Border>
         </Grid>
-        <Grid Grid.Column="2">
+
+        <GridSplitter Grid.Column="3"
+              Width="3"
+              HorizontalAlignment="Stretch"
+              Background="Gray"
+              ShowsPreview="True"/>
+
+        <Grid Grid.Column="4">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
