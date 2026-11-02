@@ -8,6 +8,7 @@ namespace Atsumari
         {
             InitializeComponent();
             ChooserScreen.libraryChosen += OnLibraryChosen;
+            ChooserScreen.libraryDeleted += OnLibraryDeleted;
         }
 
         void OnLibraryChosen(Library library)
@@ -22,6 +23,14 @@ namespace Atsumari
             {
                 MessageBox.Show("A scan is still running.\nCant open library during scan");
             }
+        }
+
+        void OnLibraryDeleted(Library library)
+        {
+            if (LibraryScreen.openLibraryId != library.ID) return;
+
+            LibraryScreen.CloseLibrary();
+            LibraryTab.IsEnabled = false;
         }
     }
 }

@@ -23,11 +23,11 @@ Windows only
 - [x] Rename an item
 - [x] Add a search function
   - [x] Item name
-  - [ ] Tags
+  - [x] Tags
   - [ ] Collections
-- [ ] Tagging
-  - [ ] Adding
-  - [ ] Removing
+- [x] Tagging
+  - [x] Adding
+  - [x] Removing
 - [ ] grouping into collections
   - [ ] Default collections
    - [ ] Untouched
@@ -42,16 +42,15 @@ Windows only
   - [ ] playcount
   - [ ] personal rating
   - [ ] Flip sort order
-- [ ] Multiple libraries
- - [ ] Exe library
+- [x] Multiple libraries
+ - [x] Exe library
  - [ ] Video library
- - [ ] Deleting libraries
- - [ ] Adding libraries
+ - [x] Deleting libraries
+ - [x] Adding libraries
  - [ ] Renaming libraries
 - [ ] Settings
   - [ ] Dark mode
-  - [ ] custom json save location
-  - [ ] Delete Json/Library
-  - [ ] (cant think of much else)
+  - [x] Open save location
+  - [x] Delete Json/Library
  
 - [ ] Mascot! Atsumari-chan (name pending)

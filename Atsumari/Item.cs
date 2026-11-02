@@ -10,6 +10,8 @@ namespace Atsumari
         public string originalName { get; set; } = Path.GetFileNameWithoutExtension(filePath);
         private string _displayName = Path.GetFileNameWithoutExtension(filePath);
         public string filePath { get; set; } = filePath;
+        public int rating { get; set; } = 0;
+        public bool favorite { get; set; } = false;
         public List<string> tags { get; set; } = new();
         public List<string> collections { get; set; } = new();
 
@@ -57,6 +59,26 @@ namespace Atsumari
 
             icon = loaded;
             OnPropertyChanged(nameof(Icon));
+        }
+
+        public bool HasTag(string name)
+        {
+            foreach (string t in tags)
+            {
+                if (string.Equals(t, name, StringComparison.OrdinalIgnoreCase))
+                    return true;
+            }
+
+            return false;
+        }
+
+        public void RemoveTag(string name)
+        {
+            for (int i = tags.Count - 1; i >= 0; i--)
+            {
+                if (string.Equals(name, tags[i], StringComparison.OrdinalIgnoreCase))
+                    tags.RemoveAt(i);
+            }
         }
     }
 }

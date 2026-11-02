@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Navigation;
 
 namespace Atsumari
 {
@@ -9,6 +10,7 @@ namespace Atsumari
         List<Library> loadedLibraries = new();
 
         public event Action<Library>? libraryChosen;
+        public event Action<Library>? libraryDeleted;
 
         public LibraryChooserView()
         {
@@ -62,6 +64,32 @@ namespace Atsumari
             }
 
             return null;
+        }
+
+        private void Delete_Click(object sender, RoutedEventArgs e)
+        {
+            Library? chosen = (Library)LibraryList.SelectedItem;
+
+            if (chosen == null)
+            {
+                ChooserMessage.Text = "Select a library first to remove it";
+                return;
+            }
+
+            string libraryRemovedName = chosen.libraryName;
+
+            var answer = MessageBox.Show($"Remove {libraryRemovedName}?", "Title", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (answer != MessageBoxResult.Yes) return;
+
+
+            loadedLibraries.Remove(chosen);
+            SaveManager.RemoveLibrary(chosen);
+
+            ChooserMessage.Text = "Removed " + libraryRemovedName;
+
+            LoadLibraries();
+
+            libraryDeleted?.Invoke(chosen);
         }
     }
 }

@@ -4,21 +4,34 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
+using System.Xml.Linq;
 
 namespace Atsumari
 {
     public partial class LibraryView : UserControl
     {
-        string[] skip = { "unins", "crash" };
+        string[] skip = { "unins", "crash", "config", "install", "setup"};
 
         private ICollectionView _itemsView = null!;
         private Library currentLibrary = null!;
         private bool isBusy;
 
+        public string? openLibraryId => currentLibrary?.ID;
+
         public LibraryView()
         {
             InitializeComponent();
+        }
+
+        public void CloseLibrary()
+        {
+            FilterBox.Text = "";
+            ScanInfoBox.Text = "";
+            currentLibrary = null!;
+            ItemsListBox.ItemsSource = null;
+            TagList.ItemsSource = null;
         }
 
         public bool OpenLibrary(Library library)
@@ -29,7 +42,46 @@ namespace Atsumari
 
             ItemsListBox.ItemsSource = library.itemsInLibrary;
             _itemsView = CollectionViewSource.GetDefaultView(library.itemsInLibrary);
-            _itemsView.Filter = item => string.IsNullOrWhiteSpace(FilterBox.Text) || ((Item)item).displayName.Contains(FilterBox.Text, StringComparison.OrdinalIgnoreCase);
+            _itemsView.Filter = FilterItem;
+            
+            ShowTags();
+            return true;
+        }
+
+        bool FilterItem(object item)
+        {
+            if (string.IsNullOrWhiteSpace(FilterBox.Text))
+                return true;
+
+            Item currentItem = (Item)item;
+            string displayName = currentItem.displayName;
+            string[] words = FilterBox.Text.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+            foreach (string word in words)
+            {
+                bool found = false;
+
+                // Check name
+                if (displayName.Contains(word, StringComparison.OrdinalIgnoreCase))
+                    found = true;
+
+                // Check tags
+                if (!found)
+                {
+                    foreach (string tag in currentItem.tags)
+                    {
+                        if (tag.Contains(word, StringComparison.OrdinalIgnoreCase))
+                        {
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!found)
+                    return false;
+            }
+
             return true;
         }
 
@@ -51,7 +103,7 @@ namespace Atsumari
             }
         }
 
-        private async void Add_Folder(object sender, RoutedEventArgs e)
+        private void Add_Folder(object sender, RoutedEventArgs e)
         {
             if (currentLibrary == null) return;
             if (isBusy) return;
@@ -60,58 +112,46 @@ namespace Atsumari
 
             if (dialog.ShowDialog() == true)
             {
-                isBusy = true;
-                ScanInfoBox.Text = $"Scanning...";
-
                 string path = dialog.FolderName;
 
-                try
-                {
-                    List<Item> newItems = await Task.Run(() => SearchPathForExes(path));
-
-                    AddItemsToList(newItems);
-                    ScanInfoBox.Text = $"Scan complete!";
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Scan failed:\n" + ex.Message);
-                    ScanInfoBox.Text = $"Scanning failed!";
-                }
-                finally
-                {
-                    isBusy = false;
-                }
+                StartScanOnPaths([path]);
             }
-
-
         }
 
-        async void Window_Drop(object sender, DragEventArgs e)
+        private void Window_Drop(object sender, DragEventArgs e)
         {
             if (currentLibrary == null) return;
             if (isBusy) return;
 
             if (e.Data.GetData(DataFormats.FileDrop) is string[] paths)
             {
-                isBusy = true;
-                ScanInfoBox.Text = $"Scanning...";
+                StartScanOnPaths(paths.ToList());
+            }
+        }
 
-                try
-                {
-                    List<Item> newItems = await Task.Run(() => SearchPathsForExes(paths.ToList()));
+        private async void StartScanOnPaths(List<string> paths)
+        {
+            isBusy = true;
+            ScanInfoBox.Text = $"Scanning...";
 
-                    AddItemsToList(newItems);
-                    ScanInfoBox.Text = $"Scan complete!";
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Scan failed:\n" + ex.Message);
-                    ScanInfoBox.Text = $"Scanning failed!";
-                }
-                finally
-                {
-                    isBusy = false;
-                }
+            try
+            {
+                Library target = currentLibrary;
+                List<Item> newItems = await Task.Run(() => SearchPathsForExes(paths.ToList()));
+
+                if (currentLibrary != target) return;
+
+                AddItemsToList(newItems);
+                ScanInfoBox.Text = $"Scan complete!";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Scan failed:\n" + ex.Message);
+                ScanInfoBox.Text = $"Scanning failed!";
+            }
+            finally
+            {
+                isBusy = false;
             }
         }
 
@@ -130,7 +170,7 @@ namespace Atsumari
                 {
                     // File
 
-                    //Check if exe
+                    // Ignore if not exe
                     if (!string.Equals(Path.GetExtension(path), ".exe", StringComparison.OrdinalIgnoreCase)) continue;
 
                     newItems.Add(new Item(path));
@@ -146,9 +186,9 @@ namespace Atsumari
             List<Item> newItems = new();
 
             string? best = Directory.GetFiles(path, "*.exe")
-                .Where(f => !skip.Any(w => Path.GetFileName(f).Contains(w, StringComparison.OrdinalIgnoreCase)))
-                .FirstOrDefault();
+                .FirstOrDefault(f => !skip.Any(w => Path.GetFileName(f).Contains(w, StringComparison.OrdinalIgnoreCase)));
 
+            //Gather subfolders
             string[] subs = Directory.GetDirectories(path);
 
             if (best != null)
@@ -159,15 +199,13 @@ namespace Atsumari
                 return newItems;
             }
 
-            //Gather subfolders
-
-
             //Return if no subs
             if (subs.Length == 0) return new();
 
-            //search in them
+            //search in subfolders
             foreach (string sub in subs)
             {
+                //Recursion
                 newItems.AddRange(SearchPathForExes(sub));
             }
 
@@ -213,18 +251,13 @@ namespace Atsumari
             if (answer != MessageBoxResult.Yes) return;
 
             if (chosen.Count == 1)
-            {
                 ScanInfoBox.Text = $"Removed {chosen[0].displayName}.";
-            }
             else
-            {
                 ScanInfoBox.Text = $"Removed {chosen.Count} items.";
-            }
 
             foreach (var item in chosen)
-            {
                 currentLibrary.itemsInLibrary.Remove(item);
-            }
+
             SaveManager.SaveLibrary(currentLibrary);
             RefreshList();
         }
@@ -243,18 +276,18 @@ namespace Atsumari
             ScanInfoBox.Text = $"Removed {removeCount} items.";
         }
 
-        private void Launch_Click(object sender, RoutedEventArgs e) => LaunchExe();
-
         private void OpenDirectory_Click(object sender, RoutedEventArgs e)
         {
             if (ItemsListBox.SelectedItem == null) return;
 
-            Item item = ItemsListBox.SelectedItem as Item;
+            Item? item = ItemsListBox.SelectedItem as Item;
 
             Process.Start("explorer.exe", $"/select,\"{item.filePath}\"");
         }
 
         private void ItemList_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e) => LaunchExe();
+
+        private void Launch_Click(object sender, RoutedEventArgs e) => LaunchExe();
 
         void LaunchExe()
         {
@@ -266,13 +299,13 @@ namespace Atsumari
 
             if (ItemsListBox.SelectedItem is not Item item)
             {
-                MessageBox.Show("Select one first.");
+                MessageBox.Show("Select an item to launch.");
                 return;
             }
 
             if (string.IsNullOrEmpty(item.filePath))
             {
-                MessageBox.Show("This item has no exe.");
+                MessageBox.Show("Path to item does not exist.");
                 return;
             }
 
@@ -290,18 +323,165 @@ namespace Atsumari
             }
         }
 
-        private void RefreshList()
-        {
-            _itemsView.Refresh();
-        }
+        private void FilterBox_TextChanged(object sender, TextChangedEventArgs e) => RefreshList();
 
-        private void FilterBox_TextChanged(object sender, TextChangedEventArgs e)
+        private void RefreshList()
         {
             _itemsView.Refresh();
         }
 
         private void TextBox_LostFocus(object sender, RoutedEventArgs e)
         {
+            if (currentLibrary == null) return;
+
+            SaveManager.SaveLibrary(currentLibrary);
+        }
+
+        private void CollectionSearch_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
+        }
+
+        private void CollectionListBox_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+
+        }
+
+        private void DeleteItem_Click(object sender, RoutedEventArgs e)
+        {
+            e.Handled = true;
+
+            if (((FrameworkElement)sender).DataContext is not Item item) return;
+
+            var answer = MessageBox.Show($"Remove {item.displayName}?", "Remove item",
+                MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (answer != MessageBoxResult.Yes) return;
+
+            currentLibrary.itemsInLibrary.Remove(item);
+            SaveManager.SaveLibrary(currentLibrary);
+            RefreshList();
+            ScanInfoBox.Text = $"Removed {item.displayName}.";
+        }
+
+        private void DeleteCollection_Click(object sender, RoutedEventArgs e)
+        {
+            e.Handled = true;
+
+            var category = ((FrameworkElement)sender).DataContext;
+            // remove it from whatever collection backs CollectionListBox, then save
+        }
+
+        private void DeleteTag_Click(object sender, RoutedEventArgs e)
+        {
+            e.Handled = true;
+
+            if (((FrameworkElement)sender).DataContext is not TagRow row) return;
+
+            var answer = MessageBox.Show($"Delete tag {row.tagName}? It will be removed from the whole library.",
+                "Delete tag", MessageBoxButton.YesNo,MessageBoxImage.Question);
+
+            if (answer != MessageBoxResult.Yes) return;
+
+            foreach (Item item in currentLibrary.itemsInLibrary)
+            {
+                item.RemoveTag(row.tagName);
+            }
+
+            for (int i = currentLibrary.tagNames.Count - 1; i >= 0; i--)
+            {
+                if (string.Equals(row.tagName, currentLibrary.tagNames[i], StringComparison.OrdinalIgnoreCase))
+                    currentLibrary.tagNames.RemoveAt(i);
+            }
+
+            SaveManager.SaveLibrary(currentLibrary);
+            ShowTags();
+            ScanInfoBox.Text = "Deleted " + row.tagName;
+        }
+
+        private void AddTag_Click(object sender, RoutedEventArgs e)
+        {
+            if (currentLibrary == null) return;
+
+            string name = TagInput.Text.Trim();
+
+            string? problem = CheckTag(name);
+            if (problem != null)
+            {
+                ScanInfoBox.Text = problem;
+                return;
+            }
+
+            currentLibrary.tagNames.Add(name);
+            SaveManager.SaveLibrary(currentLibrary);
+            ShowTags();
+            TagInput.Text = "";
+            ScanInfoBox.Text = "Added " + name;
+        }
+
+        string? CheckTag(string name)
+        {
+            if (name.Length == 0) return "Name a tag first.";
+
+            foreach (string tag in currentLibrary.tagNames)
+            {
+                if (string.Equals(tag, name, StringComparison.OrdinalIgnoreCase))
+                    return "That tag already exists";
+            }
+
+            return null;
+        }
+
+        void ShowTags()
+        {
+            if (currentLibrary == null)
+            {
+                TagList.ItemsSource = null;
+                return;
+            }
+
+            Item? selected = ItemsListBox.SelectedItem as Item;
+
+            List<TagRow> rows = new();
+
+            foreach (string tag in currentLibrary.tagNames)
+            {
+                bool has = false;
+
+                if (selected != null)
+                    has = selected.HasTag(tag);
+
+                rows.Add(new TagRow { tagName = tag, isChecked = has });
+            }
+
+            TagList.ItemsSource = rows;
+        }
+
+        private void ItemsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e) => ShowTags();
+
+        private void TagCheck_Click(object sender, RoutedEventArgs e)
+        {
+            if (((FrameworkElement)sender).DataContext is not TagRow row) return;
+
+            Item? item = ItemsListBox.SelectedItem as Item;
+            if (item == null)
+            {
+                ScanInfoBox.Text = "Select an item first";
+                ShowTags();
+                return;
+            }
+
+            bool ticked = ((CheckBox)sender).IsChecked == true;
+
+            if (ticked)
+            {
+                if (!item.HasTag(row.tagName))
+                    item.tags.Add(row.tagName);
+            }
+            else
+            {
+                item.RemoveTag(row.tagName);
+            }
+
             SaveManager.SaveLibrary(currentLibrary);
         }
     }
