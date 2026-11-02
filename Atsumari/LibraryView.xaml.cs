@@ -299,12 +299,12 @@ namespace Atsumari
             SaveManager.SaveLibrary(currentLibrary);
         }
 
-        private void CatagorySearch_TextChanged(object sender, TextChangedEventArgs e)
+        private void CollectionSearch_TextChanged(object sender, TextChangedEventArgs e)
         {
 
         }
 
-        private void CatagoryListBox_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void CollectionListBox_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
 
         }
@@ -330,7 +330,7 @@ namespace Atsumari
             e.Handled = true;
 
             var category = ((FrameworkElement)sender).DataContext;
-            // remove it from whatever collection backs CatagoryListBox, then save
+            // remove it from whatever collection backs CollectionListBox, then save
         }
 
         private void DeleteTag_Click(object sender, RoutedEventArgs e)
